@@ -24,7 +24,7 @@ const bebopScales={
  major:{name:'Major bebop',degrees:[['1',0,0],['2',2,1],['3',4,2],['4',5,3],['5',7,4],['♭6',8,5],['6',9,5],['7',11,6]]},
  halfdim:{name:'Half-diminished bebop',degrees:[['1',0,0],['♭2',1,1],['♭3',3,2],['4',5,3],['♭5',6,4],['5',7,4],['♭6',8,5],['♭7',10,6]]}
 };
-const svg=document.getElementById('chart'),NS='http://www.w3.org/2000/svg';let currentKey='C',currentMode='minor',currentProgression='blues',currentTab='blues';
+const svg=document.getElementById('chart'),NS='http://www.w3.org/2000/svg';let currentKey='E',currentMode='minor',currentProgression='blues',currentTab='blues';
 keyNames.forEach(k=>{let o=document.createElement('option');o.value=k;o.textContent=k+' minor';document.getElementById('homeKey').appendChild(o)});
 function homeData(){
  const tonic=keyPitch[currentKey],letterStart=letters.indexOf(currentKey[0]),intervals=currentMode==='minor'?minorIntervals:majorIntervals;
@@ -84,19 +84,17 @@ function renderAutumn(){
  const rootSpec={iv:[5,3],bVII:[10,6],bIII:[3,2],bVI:[8,5],iiø:[2,1],V:[7,4],i:[0,0]};
  const makeChord=(degree,kind,extra='')=>{let [semi,step]=rootSpec[degree],rootPc=(minorTonic+semi)%12,rootName=harmonyNote(semi,step),defs=intervals[kind],tones=defs.map(([s,l])=>{let target=(rootPc+s)%12,letter=letters[(letters.indexOf(rootName[0])+l)%7],diff=(target-naturalPitch[letter]+12)%12;if(diff>6)diff-=12;return {pc:target,note:letter+(diff===-1?'♭':diff===1?'♯':diff===0?'':diff<0?'♭'.repeat(-diff):'♯'.repeat(diff))}});return {name:rootName+(kind==='minor'?'m7':kind==='dominant'?'7':kind==='dominant9'?'7♭9':kind==='major'?'maj7':'m7♭5')+extra,rootPc,tones,third:tones[1].pc,seventh:tones[3].pc}};
  const custom=(offset,kind)=>{const rootPc=(minorTonic+offset+12)%12,rootName=flatChromatic[rootPc],defs=intervals[kind],tones=defs.map(([s,l])=>{let target=(rootPc+s)%12,letter=letters[(letters.indexOf(rootName[0])+l)%7],diff=(target-naturalPitch[letter]+12)%12;if(diff>6)diff-=12;return {pc:target,note:letter+(diff===-1?'♭':diff===1?'♯':diff===0?'':diff<0?'♭'.repeat(-diff):'♯'.repeat(diff))}});return {name:rootName+(kind==='minor'?'m7':'7'),rootPc,tones,third:tones[1].pc,seventh:tones[3].pc}};
- const c=(d,q,x)=>makeChord(d,q,x),a=[c('iv','minor'),c('bVII','dominant'),c('bIII','major'),c('bVI','major'),c('iiø','halfdim'),c('V','dominant'),c('i','minor'),c('i','minor')];
+ const c=(d,q,x)=>makeChord(d,q,x),a=[c('iv','minor'),c('bVII','dominant'),c('bIII','major'),c('bVI','major'),c('iiø','halfdim'),c('V','dominant9'),c('i','minor'),c('i','minor')];
  const b=[c('iiø','halfdim'),c('V','dominant9'),c('i','minor'),c('i','minor'),c('iv','minor'),c('bVII','dominant'),c('bIII','major'),c('bVI','major')];
- const combine=(left,right)=>({name:left.name+' / '+right.name,parts:[left,right],tones:[...left.tones,...right.tones],third:left.third,seventh:left.seventh});
- const end=[c('iiø','halfdim'),c('V','dominant9'),combine(c('i','minor'),custom(11,'dominant')),combine(custom(10,'minor'),custom(9,'dominant')),c('bVI','major'),c('V','dominant9'),c('i','minor'),c('i','minor')];
- const chords=[...a,...a,...b,...end],cols=chords.map((chord,i)=>({chord,label:'BAR '+(i+1),scale:labels.map((d,n)=>[d,noteAt(n,letterSteps[n]),(tonic+n)%12]),tones:chord.tones.map(t=>t.pc)}));
+ const chords=[...a,...a,...b,...a],cols=chords.map((chord,i)=>({chord,label:'BAR '+(i+1),scale:labels.map((d,n)=>[d,noteAt(n,letterSteps[n]),(tonic+n)%12]),tones:chord.tones.map(t=>t.pc)}));
  const keyLabel=minor?currentKey+' minor':'relative minor of '+currentKey+' major';
  document.getElementById('title').textContent='Autumn Leaves · '+(minor?currentKey+' minor':currentKey+' major');
- document.getElementById('instruction').textContent='Read each chord column from bottom to top and move left to right, row by row. Circles mark chord tones; green is the 3rd and navy is the 7th. This is a first-pass transcription for checking against your Real Book.';
+ document.getElementById('instruction').textContent='Read each chord column from bottom to top and move left to right, row by row. Circles mark chord tones; green is the 3rd and navy is the 7th. The chart follows the supplied chord map in concert pitch.';
  document.getElementById('scaleLine').innerHTML='<b>Transposition:</b> '+keyLabel+' · trumpet plays the displayed concert-pitch notes.';
- document.getElementById('extraLine').innerHTML='<b>Form:</b> 32 bars, AABC. Each column is one bar; bars 27–28 split into two chords of two beats each.';
- document.getElementById('progression').innerHTML='<b>Real Book first pass:</b> '+chords.map((ch,i)=>' '+(i+1)+': '+ch.name).join(' · ');
+ document.getElementById('extraLine').innerHTML='<b>Form:</b> 32 bars, AABA. Each column is one bar.';
+ document.getElementById('progression').innerHTML='<b>Autumn Leaves progression:</b> '+chords.map((ch,i)=>' '+(i+1)+': '+ch.name).join(' · ');
  document.getElementById('caption').textContent='Other chord tones have outline circles. The green and navy fills identify each chord’s 3rd and 7th.';
- document.getElementById('foot').textContent='Bars 27–28 show both two-beat chords in each bar. On split bars, the left circles are beats 1–2 and the right circles are beats 3–4. Transposed from the supplied Real Book image; please check the remaining chord spellings.';
+ document.getElementById('foot').textContent='The supplied map is in concert G minor; the chart transposes the chord progression to the selected minor key. In major mode it uses that key’s relative minor. All displayed notes are concert pitch for trumpet.';
  document.getElementById('chart').setAttribute('aria-label','Autumn Leaves chord tones and guide tones transposed to '+keyLabel);
  drawGrid(cols,labels.map((d,i)=>[d,noteAt(i,letterSteps[i])]),true);
 }
